@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>随机数生成器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字选择器</title>
     <style>
         * {
             margin: 0;
@@ -12,193 +12,197 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
         }
 
         .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
             width: 100%;
-            max-width: 400px;
         }
 
         h1 {
-            color: white;
             text-align: center;
+            color: #333;
             margin-bottom: 30px;
             font-size: 28px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease;
+        .section {
+            margin-bottom: 30px;
         }
 
-        .card:active {
-            transform: scale(0.98);
-        }
-
-        .card-title {
-            font-size: 16px;
-            color: #666;
+        .section-title {
+            font-size: 18px;
+            color: #555;
             margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .result-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 15px;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .result-number {
-            font-size: 48px;
             font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .result-placeholder {
-            font-size: 24px;
-            color: rgba(255, 255, 255, 0.6);
+        .number-display {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            min-height: 50px;
+        }
+
+        .number-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            color: white;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            /* iOS Safari 兼容性 */
-            appearance: none;
-            -webkit-appearance: none;
-            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-user-select: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
 
         .btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(0);
         }
 
-        .footer {
-            text-align: center;
-            color: white;
-            margin-top: 20px;
-            font-size: 14px;
-            opacity: 0.8;
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
-
-        .animating {
-            animation: pulse 0.3s ease;
+        .empty-message {
+            color: #999;
+            font-style: italic;
+            padding: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎲 随机数生成器</h1>
-
-        <!-- 1-35随机数 -->
-        <div class="card">
-            <div class="card-title">📌 范围：1 - 35</div>
-            <div class="result-box" id="result2">
-                <div class="result-placeholder">点击生成</div>
-            </div>
-            <button class="btn" onclick="generateNumber(1, 35, 'result2')">生成随机数</button>
+<div class="container">
+    <h1>🎲 数字选择器</h1>
+    
+    <div class="section">
+        <div class="section-title">从 1-35 中选择 5 个数字：</div>
+        <div class="number-display" id="display35">
+            <span class="empty-message">点击按钮生成数字</span>
         </div>
-
-        <!-- 1-12随机数 -->
-        <div class="card">
-            <div class="card-title">📌 范围：1 - 12</div>
-            <div class="result-box" id="result3">
-                <div class="result-placeholder">点击生成</div>
-            </div>
-            <button class="btn" onclick="generateNumber(1, 12, 'result3')">生成随机数</button>
-        </div>
-
-        <div class="footer">
-            💡 每次点击按钮生成新的随机数
+        <div class="btn-group">
+            <button class="btn" onclick="generateNumbers35()">生成数字</button>
+            <button class="btn" onclick="clearNumbers35()">清空</button>
         </div>
     </div>
 
-    <script>
-        function generateNumber(min, max, resultId) {
-            const resultBox = document.getElementById(resultId);
-            
-            // 添加动画效果
-            resultBox.classList.add('animating');
-            
-            // 生成随机数
-            const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-            
-            // 显示结果
-            setTimeout(() => {
-                resultBox.innerHTML = `<div class="result-number">${randomNum}</div>`;
-                resultBox.classList.remove('animating');
-            }, 150);
+    <div class="section">
+        <div class="section-title">从 1-12 中选择 2 个数字：</div>
+        <div class="number-display" id="display12">
+            <span class="empty-message">点击按钮生成数字</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn" onclick="generateNumbers12()">生成数字</button>
+            <button class="btn" onclick="clearNumbers12()">清空</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generateNumbers35() {
+        const numbers = [];
+        const display = document.getElementById('display35');
+        
+        // 生成5个不重复的随机数字（1-35）
+        while (numbers.length < 5) {
+            const num = Math.floor(Math.random() * 35) + 1;
+            if (!numbers.includes(num)) {
+                numbers.push(num);
+            }
         }
-
-        // 初始化：为所有按钮添加触摸事件支持（iOS兼容）
-        document.addEventListener('DOMContentLoaded', function() {
-            const buttons = document.querySelectorAll('.btn');
-            buttons.forEach(button => {
-                // 添加touchstart事件作为备用（针对iOS）
-                button.addEventListener('touchstart', function(e) {
-                    // touchstart触发时添加视觉反馈
-                    this.style.transform = 'translateY(2px)';
-                    this.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
-                }, { passive: true });
-                
-                button.addEventListener('touchend', function(e) {
-                    // touchend时恢复样式
-                    this.style.transform = '';
-                    this.style.boxShadow = '';
-                }, { passive: true });
-            });
+        
+        // 排序
+        numbers.sort((a, b) => a - b);
+        
+        // 显示数字
+        display.innerHTML = '';
+        numbers.forEach(num => {
+            const badge = document.createElement('span');
+            badge.className = 'number-badge';
+            badge.textContent = num;
+            display.appendChild(badge);
         });
+    }
 
-        // 防止双击缩放
-        document.addEventListener('dblclick', function(event) {
-            event.preventDefault();
-        }, { passive: false });
+    function generateNumbers12() {
+        const numbers = [];
+        const display = document.getElementById('display12');
+        
+        // 生成2个不重复的随机数字（1-12）
+        while (numbers.length < 2) {
+            const num = Math.floor(Math.random() * 12) + 1;
+            if (!numbers.includes(num)) {
+                numbers.push(num);
+            }
+        }
+        
+        // 排序
+        numbers.sort((a, b) => a - b);
+        
+        // 显示数字
+        display.innerHTML = '';
+        numbers.forEach(num => {
+            const badge = document.createElement('span');
+            badge.className = 'number-badge';
+            badge.textContent = num;
+            display.appendChild(badge);
+        });
+    }
 
-        // 防止长按菜单
-        document.addEventListener('contextmenu', function(event) {
-            event.preventDefault();
-        }, { passive: false });
-    </script>
+    function clearNumbers35() {
+        const display = document.getElementById('display35');
+        display.innerHTML = '<span class="empty-message">点击按钮生成数字</span>';
+    }
+
+    function clearNumbers12() {
+        const display = document.getElementById('display12');
+        display.innerHTML = '<span class="empty-message">点击按钮生成数字</span>';
+    }
+</script>
 </body>
 </html>
+
